@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hypium": {
+      "version": "1.0.25",
+      "integrity": "resolved"
+    },
+    "@ohos/hamock": {
+      "version": "1.0.0",
+      "integrity": "resolved"
+    }
+  }
+}

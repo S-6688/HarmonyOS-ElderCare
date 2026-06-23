@@ -1,0 +1,14 @@
+{
+  "src": [
+    "pages/SplashPage",
+    "pages/LoginPage",
+    "pages/GuidePage",
+    "pages/Index",
+    "pages/HealthRecord",
+    "pages/Knowledge",
+    "pages/KnowledgeDetail",
+    "pages/EmergencyContact",
+    "pages/Settings",
+    "pages/MedicationListPage"
+  ]
+}

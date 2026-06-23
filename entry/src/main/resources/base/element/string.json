@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "银龄通智慧养老服务平台"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "银龄通智慧养老服务平台主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "银龄通"
+    },
+    {
+      "name": "permission_place_call_reason",
+      "value": "用于紧急联系人一键拨号功能"
+    },
+    {
+      "name": "permission_notification_reason",
+      "value": "用于健康提醒和用药通知推送"
+    },
+    {
+      "name": "permission_read_storage_reason",
+      "value": "用于读取健康记录和用户数据"
+    },
+    {
+      "name": "permission_write_storage_reason",
+      "value": "用于保存健康记录和用户数据"
+    },
+    {
+      "name": "permission_reminder_reason",
+      "value": "用于用药提醒定时通知推送"
+    }
+  ]
+}
