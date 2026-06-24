@@ -49,7 +49,3 @@ export class AppSizes {
 export function scaledSize(base: number, fontSizeLevel: number): number {
   return base + fontSizeLevel * AppSizes.FONT_SCALE_STEP
 }
-
-/** 无障碍辅助函数（预留，当前为空实现） */
-export function setAccessibility(text: string): void {
-}

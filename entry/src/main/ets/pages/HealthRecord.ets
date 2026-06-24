@@ -54,6 +54,7 @@ struct HealthRecord {
   private listScroller: ListScroller = new ListScroller()   // 列表滚动控制器（用于关闭滑动操作）
   private settings: RenderingContextSettings = new RenderingContextSettings(true) // Canvas 抗锯齿设置
   private canvasContext: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings) // Canvas 绘图上下文
+  private hasLoadedSampleData: boolean = false              // 避免页面多次出现时重复灌入样例数据
 
   private sz(base: number): number {
     return scaledSize(base, this.fontSizeLevel)
@@ -81,6 +82,10 @@ struct HealthRecord {
   }
 
   private loadSampleData(): void {
+    if (this.hasLoadedSampleData) {
+      return
+    }
+    // 当前页面使用内存样例数据驱动趋势图；后续接入持久化时可替换为数据库/接口加载。
     const now: number = Date.now()
     const dayMs: number = 24 * 60 * 60 * 1000
     const samples: HealthData[] = [
@@ -116,6 +121,7 @@ struct HealthRecord {
     for (const sample of samples) {
       this.healthViewModel.addHealthRecord(sample)
     }
+    this.hasLoadedSampleData = true
   }
 
   /**

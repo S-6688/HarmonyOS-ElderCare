@@ -1,0 +1,10 @@
+{
+  "name": "harmonyos-eldercare",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "hvigor": ".\\hvigorw.cmd",
+    "build": ".\\hvigorw.cmd --mode module -p module=entry@default assembleHap",
+    "clean": ".\\hvigorw.cmd clean"
+  }
+}

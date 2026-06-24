@@ -11,10 +11,8 @@
  */
 import { call } from '@kit.TelephonyKit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { HealthData } from '../model/HealthData'
 import { MedicineReminder } from '../model/MedicineReminder'
 import { EmergencyContact as ContactModel } from '../model/EmergencyContact'
-import { HealthViewModel } from '../viewmodel/HealthViewModel'
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
@@ -40,7 +38,6 @@ struct Index {
   healthCards: HealthCardInfo[] = []                     // 健康卡片数据
   medicineReminders: MedicineReminder[] = []             // 用药提醒数据
   @State emergencyContacts: ContactModel[] = []          // 紧急联系人列表
-  private healthViewModel: HealthViewModel = new HealthViewModel()
 
   /** 字体自适应缩放方法 */
   private sz(base: number): number {

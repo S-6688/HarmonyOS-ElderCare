@@ -45,6 +45,7 @@ struct GuidePage {
     if (hostContext) {
       PreferencesUtil.getInstance().ensureInit(hostContext)
     }
+    // 同时写旧布尔键和新版本键：旧键兼容既有逻辑，版本键用于控制引导页升级后重新展示。
     PreferencesUtil.getInstance().put(Constants.KEY_IS_FIRST_LAUNCH, false)
     PreferencesUtil.getInstance().put(Constants.KEY_GUIDE_VERSION, Constants.CURRENT_GUIDE_VERSION)
   }

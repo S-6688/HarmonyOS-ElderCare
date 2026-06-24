@@ -104,6 +104,7 @@ export class PreferencesUtil {
   /**
    * 写入键值对并立即持久化（flush）
    * putSync 仅写入内存，flush 将数据刷写到磁盘，确保数据不丢失
+   * 页面跳转依赖的状态（登录、引导页完成状态）必须立即 flush，避免重启后读到旧值。
    */
   put(key: string, value: preferences.ValueType): void {
     try {

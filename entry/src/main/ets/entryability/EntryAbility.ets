@@ -37,6 +37,7 @@ export default class EntryAbility extends UIAbility {
    * 1. 获取 ReminderService 单例并初始化（申请通知权限、创建通知渠道）
    * 2. 初始化示例用药提醒数据
    * 3. 将所有启用的提醒同步到系统后台提醒代理
+   * 说明：当前项目尚未接入数据库，提醒数据来自 HealthViewModel 的内置样例。
    */
   private async initReminderService(): Promise<void> {
     try {
@@ -58,7 +59,8 @@ export default class EntryAbility extends UIAbility {
 
   /**
    * 窗口阶段创建回调，在此加载应用的第一个页面
-   * 使用 SplashPage（闪屏页）作为入口，闪屏页会根据首次启动/登录状态自动跳转
+   * 固定加载 SplashPage，后续由 SplashPage 统一判断 Guide/Login/Index 跳转。
+   * 这样模拟器、预览器、冷启动都走同一套入口流程。
    */
   onWindowStageCreate(windowStage: window.WindowStage): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageCreate');

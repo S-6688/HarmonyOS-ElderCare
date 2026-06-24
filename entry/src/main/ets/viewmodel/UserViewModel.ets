@@ -56,11 +56,15 @@ export class UserViewModel {
 
   /** 判断是否首次启动应用 */
   isFirstLaunch(): boolean {
-    return PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_FIRST_LAUNCH, true)
+    const guideVersion: number = PreferencesUtil.getInstance().getNumber(Constants.KEY_GUIDE_VERSION, 0)
+    const isLegacyFirstLaunch: boolean =
+      PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_FIRST_LAUNCH, true)
+    return guideVersion < Constants.CURRENT_GUIDE_VERSION || isLegacyFirstLaunch
   }
 
   /** 标记非首次启动（引导页完成后调用） */
   setFirstLaunchDone(): void {
+    // 旧键用于兼容历史逻辑；版本键用于判断当前版本引导是否已完成。
     PreferencesUtil.getInstance().put(Constants.KEY_IS_FIRST_LAUNCH, false)
     PreferencesUtil.getInstance().put(Constants.KEY_GUIDE_VERSION, Constants.CURRENT_GUIDE_VERSION)
   }
