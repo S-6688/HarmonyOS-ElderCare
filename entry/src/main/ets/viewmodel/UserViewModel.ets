@@ -62,6 +62,7 @@ export class UserViewModel {
   /** 标记非首次启动（引导页完成后调用） */
   setFirstLaunchDone(): void {
     PreferencesUtil.getInstance().put(Constants.KEY_IS_FIRST_LAUNCH, false)
+    PreferencesUtil.getInstance().put(Constants.KEY_GUIDE_VERSION, Constants.CURRENT_GUIDE_VERSION)
   }
 
   /** 获取字体大小等级（0=标准，1=较大，2=最大） */

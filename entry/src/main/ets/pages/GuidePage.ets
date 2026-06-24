@@ -46,6 +46,7 @@ struct GuidePage {
       PreferencesUtil.getInstance().ensureInit(hostContext)
     }
     PreferencesUtil.getInstance().put(Constants.KEY_IS_FIRST_LAUNCH, false)
+    PreferencesUtil.getInstance().put(Constants.KEY_GUIDE_VERSION, Constants.CURRENT_GUIDE_VERSION)
   }
 
   build() {

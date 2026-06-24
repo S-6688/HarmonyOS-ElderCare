@@ -15,7 +15,7 @@ struct SplashPage {
   @State fadeLevel: number = 0       // 透明度动画值（0→1 渐显）
   @State scaleLevel: number = 0.8    // 缩放动画值（0.8→1 放大）
   @State prefsReady: boolean = false // Preferences 是否就绪
-  private isFirstLaunch: boolean = true // 是否首次启动
+  private shouldShowGuide: boolean = true // 是否需要展示引导页
   private isLogin: boolean = false      // 是否已登录
 
   aboutToAppear(): void {
@@ -24,8 +24,11 @@ struct SplashPage {
     if (hostContext) {
       PreferencesUtil.getInstance().ensureInit(hostContext)
     }
-    // 读取首次启动和登录状态，决定跳转目标
-    this.isFirstLaunch = PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_FIRST_LAUNCH, true)
+    // 读取引导页完成状态和登录状态，决定跳转目标
+    const guideVersion: number = PreferencesUtil.getInstance().getNumber(Constants.KEY_GUIDE_VERSION, 0)
+    const isLegacyFirstLaunch: boolean =
+      PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_FIRST_LAUNCH, true)
+    this.shouldShowGuide = guideVersion < Constants.CURRENT_GUIDE_VERSION || isLegacyFirstLaunch
     this.isLogin = PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_LOGIN, false)
     this.prefsReady = true
 
@@ -48,7 +51,7 @@ struct SplashPage {
   private navigateNext(): void {
     const router = this.getUIContext().getRouter()
     try {
-      if (this.isFirstLaunch) {
+      if (this.shouldShowGuide) {
         router.replaceUrl({ url: 'pages/GuidePage' })
       } else if (this.isLogin) {
         router.replaceUrl({ url: 'pages/Index' })

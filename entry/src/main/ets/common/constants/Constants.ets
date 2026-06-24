@@ -19,5 +19,7 @@ export class Constants {
   static readonly KEY_FONT_SIZE_LEVEL: string = 'fontSizeLevel'   // 字体大小等级键（0/1/2）
   static readonly KEY_FAVORITE_IDS: string = 'favoriteArticleIds' // 收藏文章ID列表键（逗号分隔）
   static readonly KEY_IS_FIRST_LAUNCH: string = 'isFirstLaunch'   // 首次启动标记键
+  static readonly KEY_GUIDE_VERSION: string = 'guideVersion'      // 已完成引导页版本键
+  static readonly CURRENT_GUIDE_VERSION: number = 1               // 当前引导页版本
   static readonly KEY_EMERGENCY_CONTACTS: string = 'emergencyContacts' // 紧急联系人JSON键
 }
