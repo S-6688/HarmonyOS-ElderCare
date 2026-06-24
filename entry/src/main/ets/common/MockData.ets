@@ -1,3 +1,13 @@
+/**
+ * MockData - 模拟数据类
+ * 提供应用各模块的示例/测试数据，包括：
+ *   - DEFAULT_USER: 默认用户（张爷爷，72岁）
+ *   - HEALTH_RECORDS: 7天健康数据（血压/血糖/心率各7条）
+ *   - MEDICINE_REMINDERS: 3条用药提醒
+ *   - EMERGENCY_CONTACTS: 2个紧急联系人
+ *   - KNOWLEDGE_ARTICLES: 15篇养生文章（5个分类各3篇）
+ * 注意：此数据仅用于演示，实际应用应从数据库或网络加载
+ */
 import { User } from '../model/User'
 import { HealthData } from '../model/HealthData'
 import { MedicineReminder } from '../model/MedicineReminder'

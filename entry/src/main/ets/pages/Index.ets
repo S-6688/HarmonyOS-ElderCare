@@ -1,3 +1,14 @@
+/**
+ * Index - 应用首页（底部Tab导航）
+ * 包含三个Tab页：首页、健康记录、养生知识
+ * 首页核心功能：
+ *   - 根据时段显示问候语（早上好/下午好/晚上好）
+ *   - 健康概览卡片轮播（血压/血糖/心率）
+ *   - 今日用药提醒列表
+ *   - 快捷入口（健康记录/养生知识/紧急联系）
+ *   - 一键呼叫紧急联系人
+ * @StorageLink 装饰器确保 fontSizeLevel/userName/isLogin 与 AppStorage 双向同步
+ */
 import { call } from '@kit.TelephonyKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { HealthData } from '../model/HealthData'
@@ -8,32 +19,38 @@ import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 
+/** 健康卡片展示数据（用于首页 Swiper 轮播） */
 class HealthCardInfo {
-  type: string = ''
-  value: string = ''
-  unit: string = ''
-  color1: string = ''
-  color2: string = ''
+  type: string = ''    // 指标类型
+  value: string = ''   // 数值
+  unit: string = ''    // 单位
+  color1: string = ''  // 渐变色起始
+  color2: string = ''  // 渐变色终止
 }
 
 @Entry
 @Component
 struct Index {
-  @State currentIndex: number = 0
-  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
-  @StorageLink('userName') userName: string = '游客'
-  @StorageLink('isLogin') isLogin: boolean = false
-  @State greeting: string = '早上好'
-  @State currentDate: string = ''
-  healthCards: HealthCardInfo[] = []
-  medicineReminders: MedicineReminder[] = []
-  @State emergencyContacts: ContactModel[] = []
+  @State currentIndex: number = 0                      // 当前Tab索引
+  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0  // 全局字体等级
+  @StorageLink('userName') userName: string = '游客'       // 全局用户名
+  @StorageLink('isLogin') isLogin: boolean = false         // 全局登录状态
+  @State greeting: string = '早上好'                     // 问候语
+  @State currentDate: string = ''                        // 当前日期文字
+  healthCards: HealthCardInfo[] = []                     // 健康卡片数据
+  medicineReminders: MedicineReminder[] = []             // 用药提醒数据
+  @State emergencyContacts: ContactModel[] = []          // 紧急联系人列表
   private healthViewModel: HealthViewModel = new HealthViewModel()
 
+  /** 字体自适应缩放方法 */
   private sz(base: number): number {
     return scaledSize(base, this.fontSizeLevel)
   }
 
+  /**
+   * 页面初始化
+   * 流程：确保 Preferences 就绪 → 检查登录状态 → 加载各类数据
+   */
   aboutToAppear(): void {
     const hostContext = this.getUIContext().getHostContext()
     if (hostContext) {
@@ -46,6 +63,7 @@ struct Index {
     this.loadEmergencyContacts()
   }
 
+  /** 检查登录状态，未登录则跳转登录页 */
   private checkLoginStatus(): void {
     const loginStatus: boolean = PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_LOGIN, false)
     if (!loginStatus) {
@@ -57,6 +75,7 @@ struct Index {
     }
   }
 
+  /** 根据当前小时数更新问候语和日期显示 */
   private updateGreeting(): void {
     const hour: number = new Date().getHours()
     if (hour >= 6 && hour < 12) {
@@ -71,6 +90,7 @@ struct Index {
     this.currentDate = `${now.getMonth() + 1}月${now.getDate()}日 ${weekDays[now.getDay()]}`
   }
 
+  /** 加载健康概览卡片数据（血压/血糖/心率） */
   private loadHealthData(): void {
     const card1: HealthCardInfo = new HealthCardInfo()
     card1.type = '血压'; card1.value = '120/80'; card1.unit = 'mmHg'
@@ -84,12 +104,17 @@ struct Index {
     this.healthCards = [card1, card2, card3]
   }
 
+  /** 加载今日用药提醒数据 */
   private loadMedicineReminders(): void {
     const r1: MedicineReminder = new MedicineReminder(1, '降压药', '1片', '08:00', [1, 2, 3, 4, 5, 6, 7], true, '饭后服用')
     const r2: MedicineReminder = new MedicineReminder(2, '钙片', '2片', '12:00', [1, 2, 3, 4, 5, 6, 7], true, '随餐服用')
     this.medicineReminders = [r1, r2]
   }
 
+  /**
+   * 从 Preferences 加载紧急联系人数据
+   * 存储格式为 JSON 字符串，需解析后重建 ContactModel 对象数组
+   */
   private loadEmergencyContacts(): void {
     const json: string = PreferencesUtil.getInstance().getString(Constants.KEY_EMERGENCY_CONTACTS, '')
     if (json.length > 0) {
@@ -114,6 +139,10 @@ struct Index {
     }
   }
 
+  /**
+   * 拨打电话功能
+   * 先检查设备是否支持语音通话能力，支持则调用系统拨号接口
+   */
   private makeCall(phone: string): void {
     const isSupport: boolean = call.hasVoiceCapability()
     if (isSupport) {
@@ -125,6 +154,11 @@ struct Index {
     }
   }
 
+  /**
+   * 一键紧急呼叫处理逻辑
+   * 优先级：优先联系人 > 第一个联系人 > 无联系人提示
+   * 拨打前均弹出确认对话框，防止误触
+   */
   private handleEmergencyCall(): void {
     let priorityContact: ContactModel | null = null
     for (const c of this.emergencyContacts) {

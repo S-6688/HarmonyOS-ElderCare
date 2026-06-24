@@ -1,11 +1,19 @@
+/**
+ * LoginPage - 登录页
+ * 提供三种登录方式：
+ *   1. 一键登录：使用默认用户"张爷爷"直接登录（适合老年人简化操作）
+ *   2. 姓名登录：输入姓名后确认登录
+ *   3. 游客模式：跳过登录，部分功能受限
+ * 登录成功后将用户名和登录状态写入 AppStorage 和 Preferences，并跳转首页
+ */
 import { UserViewModel } from '../viewmodel/UserViewModel'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 
 @Entry
 @Component
 struct LoginPage {
-  @State inputName: string = ''
-  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
+  @State inputName: string = ''                     // 用户输入的姓名
+  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0 // 全局字体大小等级
   private userViewModel: UserViewModel = new UserViewModel()
 
   private scaledSize(base: number): number {
@@ -20,8 +28,14 @@ struct LoginPage {
     this.userViewModel.init()
   }
 
+  /**
+   * 登录成功回调
+   * 流程：ViewModel 登录 → 更新 AppStorage 全局状态 → 跳转首页
+   * @param name 登录使用的用户名
+   */
   private onLoginSuccess(name: string): void {
     this.userViewModel.login(name)
+    // 同步更新 AppStorage，其他页面通过 @StorageLink 可实时感知
     AppStorage.setOrCreate('userName', name)
     AppStorage.setOrCreate('isLogin', true)
     try {

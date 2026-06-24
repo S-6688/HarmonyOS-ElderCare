@@ -1,3 +1,8 @@
+/**
+ * GuidePage - 引导页（首次启动时展示）
+ * 功能：通过 Swiper 展示3页引导内容（健康管理、用药提醒、紧急呼叫）
+ * 仅在首次启动时显示，点击"立即体验"或"跳过"后标记非首次启动并跳转登录页
+ */
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 import { Constants } from '../common/constants/Constants'
 
@@ -11,7 +16,7 @@ class GuideItemData {
 @Entry
 @Component
 struct GuidePage {
-  @State currentIndex: number = 0
+  @State currentIndex: number = 0 // 当前展示的引导页索引
 
   private guideItems: GuideItemData[] = []
 
@@ -34,6 +39,7 @@ struct GuidePage {
     this.guideItems = [item1, item2, item3]
   }
 
+  /** 标记非首次启动，后续启动不再显示引导页 */
   private markFirstLaunchDone(): void {
     const hostContext = this.getUIContext().getHostContext()
     if (hostContext) {
@@ -79,8 +85,8 @@ struct GuidePage {
         .selectedItemHeight(8)
         .color('#CCCCCC')
         .selectedColor('#1A56DB'))
-      .loop(false)
-      .autoPlay(false)
+      .loop(false)          // 禁止循环滑动
+      .autoPlay(false)      // 禁止自动播放
       .duration(500)
       .curve(Curve.EaseInOut)
       .onChange((index: number) => {
@@ -89,6 +95,7 @@ struct GuidePage {
       .layoutWeight(1)
 
       Column() {
+        // "立即体验"按钮：仅在最后一页显示，点击后完成引导
         Button('立即体验')
           .width('80%')
           .height(56)
@@ -106,6 +113,7 @@ struct GuidePage {
           .visibility(this.currentIndex === this.guideItems.length - 1 ? Visibility.Visible : Visibility.Hidden)
 
         Row() {
+          // "跳过"按钮：随时可跳过引导
           Text('跳过')
             .fontSize(16)
             .fontColor('#999999')

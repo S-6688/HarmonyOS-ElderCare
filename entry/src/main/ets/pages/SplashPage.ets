@@ -1,34 +1,50 @@
+/**
+ * SplashPage - 闪屏页（应用启动入口页面）
+ * 功能：显示带渐变背景的闪屏动画，2秒后根据应用状态自动跳转
+ * 跳转逻辑：
+ *   首次启动 → GuidePage（引导页）
+ *   非首次 + 已登录 → Index（首页）
+ *   非首次 + 未登录 → LoginPage（登录页）
+ */
 import { Constants } from '../common/constants/Constants'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 
 @Entry
 @Component
 struct SplashPage {
-  @State fadeLevel: number = 0
-  @State scaleLevel: number = 0.8
-  @State prefsReady: boolean = false
-  private isFirstLaunch: boolean = true
-  private isLogin: boolean = false
+  @State fadeLevel: number = 0       // 透明度动画值（0→1 渐显）
+  @State scaleLevel: number = 0.8    // 缩放动画值（0.8→1 放大）
+  @State prefsReady: boolean = false // Preferences 是否就绪
+  private isFirstLaunch: boolean = true // 是否首次启动
+  private isLogin: boolean = false      // 是否已登录
 
   aboutToAppear(): void {
+    // 确保 Preferences 已初始化（在页面级而非 Ability 级的保险措施）
     const hostContext = this.getUIContext().getHostContext()
     if (hostContext) {
       PreferencesUtil.getInstance().ensureInit(hostContext)
     }
+    // 读取首次启动和登录状态，决定跳转目标
     this.isFirstLaunch = PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_FIRST_LAUNCH, true)
     this.isLogin = PreferencesUtil.getInstance().getBoolean(Constants.KEY_IS_LOGIN, false)
     this.prefsReady = true
 
+    // 启动渐显+放大动画，持续1秒
     this.getUIContext().animateTo({ duration: 1000, curve: Curve.EaseOut }, () => {
       this.fadeLevel = 1
       this.scaleLevel = 1
     })
 
+    // 2秒后执行跳转
     setTimeout(() => {
       this.navigateNext()
     }, 2000)
   }
 
+  /**
+   * 根据应用状态跳转到下一个页面
+   * 优先级：首次启动 > 登录状态
+   */
   private navigateNext(): void {
     const router = this.getUIContext().getRouter()
     try {
@@ -59,8 +75,8 @@ struct SplashPage {
           .margin({ top: 16 })
           .letterSpacing(4)
       }
-      .scale({ x: this.scaleLevel, y: this.scaleLevel })
-      .opacity(this.fadeLevel)
+      .scale({ x: this.scaleLevel, y: this.scaleLevel }) // 缩放动画
+      .opacity(this.fadeLevel)                            // 渐显动画
     }
     .width('100%')
     .height('100%')

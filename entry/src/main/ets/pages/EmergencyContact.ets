@@ -1,3 +1,14 @@
+/**
+ * EmergencyContact - 紧急联系人管理页面
+ * 功能：
+ *   - 展示紧急联系人列表，优先联系人置顶并高亮
+ *   - 添加/编辑联系人（半模态弹窗 Sheet）
+ *   - 拨打电话（确认对话框防误触）
+ *   - 一键紧急呼叫（优先联系人 > 首个联系人 > 提示添加）
+ *   - 左滑快捷操作：切换优先/删除
+ *   - 联系人数据持久化到 Preferences（JSON 格式）
+ * 优先联系人规则：全局唯一，设置新优先时自动取消旧的
+ */
 import { call } from '@kit.TelephonyKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
@@ -10,15 +21,15 @@ import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 struct EmergencyContact {
   @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
   @StorageLink('isLogin') isLogin: boolean = false
-  @State contacts: ContactModel[] = []
-  @State showSheet: boolean = false
-  @State isEditMode: boolean = false
-  @State editingId: number = 0
-  @State editName: string = ''
-  @State editPhone: string = ''
-  @State editRelation: string = ''
-  @State editPriority: boolean = false
-  private nextId: number = 1
+  @State contacts: ContactModel[] = []     // 联系人列表（优先联系人排在前面）
+  @State showSheet: boolean = false        // 是否显示添加/编辑弹窗
+  @State isEditMode: boolean = false       // 弹窗模式：false=添加，true=编辑
+  @State editingId: number = 0             // 正在编辑的联系人ID
+  @State editName: string = ''             // 编辑中的姓名
+  @State editPhone: string = ''            // 编辑中的电话
+  @State editRelation: string = ''         // 编辑中的关系
+  @State editPriority: boolean = false     // 编辑中的优先状态
+  private nextId: number = 1               // 下一个新联系人的ID
 
   private sz(base: number): number {
     return scaledSize(base, this.fontSizeLevel)
@@ -44,6 +55,11 @@ struct EmergencyContact {
     }
   }
 
+  /**
+   * 从 Preferences 加载联系人数据
+   * 流程：读取JSON字符串 → 解析为对象数组 → 重建 ContactModel → 排序（优先在前）
+   * 若无数据或解析失败，加载示例联系人
+   */
   private loadContacts(): void {
     const json: string = PreferencesUtil.getInstance().getString(Constants.KEY_EMERGENCY_CONTACTS, '')
     if (json.length > 0) {
@@ -74,6 +90,7 @@ struct EmergencyContact {
     }
   }
 
+  /** 加载示例联系人（首次使用时），并持久化到 Preferences */
   private loadSampleContacts(): void {
     const c1: ContactModel = new ContactModel(1, '张医生', '13800138000', '家庭医生', true)
     const c2: ContactModel = new ContactModel(2, '李护士', '13900139000', '社区护士', false)
@@ -83,12 +100,14 @@ struct EmergencyContact {
     this.saveContacts()
   }
 
+  /** 保存联系人到 Preferences（JSON格式）并同步到 AppStorage */
   private saveContacts(): void {
     const json: string = JSON.stringify(this.contacts)
     PreferencesUtil.getInstance().put(Constants.KEY_EMERGENCY_CONTACTS, json)
     AppStorage.setOrCreate('emergencyContacts', json)
   }
 
+  /** 按优先联系人排序（优先的排前面） */
   private sortContacts(list: ContactModel[]): void {
     list.sort((a: ContactModel, b: ContactModel) => {
       if (a.isPriority && !b.isPriority) {
@@ -156,6 +175,10 @@ struct EmergencyContact {
     })
   }
 
+  /**
+   * 保存联系人（添加或编辑）
+   * 优先联系人规则：设为优先时，自动取消其他联系人的优先状态（全局唯一）
+   */
   private saveContact(): void {
     if (this.editName.trim().length === 0 || this.editPhone.trim().length === 0) {
       return
@@ -204,6 +227,10 @@ struct EmergencyContact {
     this.saveContacts()
   }
 
+  /**
+   * 切换联系人的优先状态
+   * 设为优先时，自动取消其他联系人的优先状态（保证全局唯一优先联系人）
+   */
   private togglePriority(id: number): void {
     let target: ContactModel | null = null
     for (const c of this.contacts) {

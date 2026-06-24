@@ -1,6 +1,19 @@
+/**
+ * MedicationListPage - 用药提醒列表页面
+ * 功能：
+ *   - 展示所有用药提醒，支持启用/禁用切换（Toggle开关）
+ *   - 点击时间可修改提醒时间（TimePickerDialog）
+ *   - 添加新用药提醒（CustomDialog弹窗）
+ *   - 删除用药提醒（确认对话框防误触）
+ */
 import { MedicineReminder } from '../model/MedicineReminder'
 import { AppColors, AppSizes } from '../common/constants/Styles'
 
+/**
+ * AddReminderDialog - 添加用药提醒对话框（@CustomDialog）
+ * 输入：药名、用量/说明、提醒时间
+ * 确认后通过 confirm 回调将数据传回主页面
+ */
 @CustomDialog
 struct AddReminderDialog {
   controller?: CustomDialogController

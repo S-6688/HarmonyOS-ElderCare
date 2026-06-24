@@ -1,3 +1,13 @@
+/**
+ * Knowledge - 养生知识列表页面
+ * 功能：
+ *   - 按分类筛选文章（全部/饮食养生/运动保健/心理健康/慢病管理/季节养生）
+ *   - 关键词搜索文章（匹配标题和摘要）
+ *   - 文章收藏/取消收藏（星标按钮）
+ *   - 点击文章跳转详情页
+ * 收藏数据持久化到 Preferences（逗号分隔的ID字符串）
+ * @Provide('favoriteArticleIds') 向子组件传递收藏ID列表
+ */
 import { KnowledgeArticle } from '../model/KnowledgeArticle'
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
@@ -13,6 +23,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   '慢病管理': '#E74C3C', '季节养生': '#1A56DB'
 }
 
+/** 创建示例养生文章数据（15篇，覆盖5个分类） */
 function createSampleArticles(): KnowledgeArticle[] {
   const articles: KnowledgeArticle[] = []
   const data: string[][] = [
@@ -64,13 +75,13 @@ function createSampleArticles(): KnowledgeArticle[] {
 @Entry
 @Component
 struct Knowledge {
-  @State searchText: string = ''
-  @State currentCategoryIndex: number = 0
-  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
-  @StorageLink('isLogin') isLogin: boolean = false
-  @Provide('favoriteArticleIds') favoriteIds: number[] = []
-  @State allArticles: KnowledgeArticle[] = []
-  @State displayArticles: KnowledgeArticle[] = []
+  @State searchText: string = ''                          // 搜索关键词
+  @State currentCategoryIndex: number = 0                 // 当前分类索引（0=全部）
+  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0 // 全局字体等级
+  @StorageLink('isLogin') isLogin: boolean = false         // 全局登录状态
+  @Provide('favoriteArticleIds') favoriteIds: number[] = [] // 收藏文章ID列表（跨组件共享）
+  @State allArticles: KnowledgeArticle[] = []              // 全部文章数据
+  @State displayArticles: KnowledgeArticle[] = []          // 当前显示的文章（筛选+搜索后的结果）
   private searchController: SearchController = new SearchController()
 
   private sz(base: number): number {
@@ -135,6 +146,10 @@ struct Knowledge {
     this.updateDisplayArticles()
   }
 
+  /**
+   * 更新显示的文章列表
+   * 筛选逻辑：先按分类过滤 → 再按搜索关键词过滤（匹配标题和摘要）
+   */
   private updateDisplayArticles(): void {
     let filtered: KnowledgeArticle[] = this.allArticles
     if (this.currentCategoryIndex > 0) {

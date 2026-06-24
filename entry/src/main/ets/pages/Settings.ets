@@ -1,9 +1,20 @@
+/**
+ * Settings - 设置页面
+ * 功能：
+ *   - 显示当前登录用户信息
+ *   - 消息通知开关
+ *   - 紧急联系人管理入口
+ *   - 字体大小调节（Slider滑块，3级：标准/较大/最大）
+ *   - 关于银龄通/隐私政策/用户协议
+ *   - 退出登录
+ * 字体大小通过 AppStorage 全局同步，所有页面实时生效
+ */
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
 import { UserViewModel } from '../viewmodel/UserViewModel'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 
-const FONT_LEVEL_LABELS: string[] = ['标准', '较大', '最大']
+const FONT_LEVEL_LABELS: string[] = ['标准', '较大', '最大'] // 字体等级标签
 
 @Entry
 @Component
@@ -11,7 +22,7 @@ struct Settings {
   @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
   @StorageLink('isLogin') isLogin: boolean = false
   @StorageLink('userName') userName: string = '游客'
-  @State isNotificationOn: boolean = true
+  @State isNotificationOn: boolean = true                   // 消息通知开关状态
   private userViewModel: UserViewModel = new UserViewModel()
 
   private sz(base: number): number {
@@ -26,6 +37,10 @@ struct Settings {
     this.userViewModel.init()
   }
 
+  /**
+   * 退出登录处理
+   * ViewModel 登出 → 清除 AppStorage 全局状态 → 跳转登录页
+   */
   private handleLogout(): void {
     this.userViewModel.logout()
     AppStorage.setOrCreate('isLogin', false)

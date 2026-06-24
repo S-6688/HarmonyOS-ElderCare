@@ -1,10 +1,19 @@
+/**
+ * HealthRecord - 健康记录页面
+ * 功能：
+ *   - 按类型切换查看健康数据（血压/血糖/心率/体温）
+ *   - Canvas 绘制近7日趋势折线图
+ *   - 半模态弹窗（bindSheet）录入新健康数据
+ *   - 左滑删除历史记录
+ *   - 登录状态校验，未登录跳转登录页
+ */
 import { HealthData } from '../model/HealthData'
 import { HealthViewModel } from '../viewmodel/HealthViewModel'
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
 import { PreferencesUtil } from '../common/utils/PreferencesUtil'
 
-const HEALTH_TYPES: string[] = ['血压', '血糖', '心率', '体温']
+const HEALTH_TYPES: string[] = ['血压', '血糖', '心率', '体温'] // 健康指标类型列表
 const TYPE_UNITS: Record<string, string> = { '血压': 'mmHg', '血糖': 'mmol/L', '心率': '次/分', '体温': '°C' }
 const TYPE_ICONS: Record<string, string> = { '血压': '压', '血糖': '糖', '心率': '心', '体温': '温' }
 const TYPE_COLORS: Record<string, string[]> = {
@@ -14,11 +23,13 @@ const TYPE_COLORS: Record<string, string[]> = {
   '体温': ['#F59E0B', '#FCD34D']
 }
 
+/** 趋势图数据点 */
 class TrendPoint {
-  label: string = ''
-  value: number = 0
+  label: string = '' // X轴标签（如 "6/24"）
+  value: number = 0  // Y轴数值
 }
 
+/** Canvas 绘图坐标点 */
 class ChartPoint {
   x: number = 0
   y: number = 0
@@ -27,22 +38,22 @@ class ChartPoint {
 @Entry
 @Component
 struct HealthRecord {
-  @State currentTypeIndex: number = 0
-  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
-  @StorageLink('isLogin') isLogin: boolean = false
-  @State showAddSheet: boolean = false
-  @State addTypeIndex: number = 0
-  @State addValue: string = ''
-  @State addNote: string = ''
-  @State addDate: Date = new Date()
-  @State filteredRecords: HealthData[] = []
-  @State trendPoints: TrendPoint[] = []
-  @State sheetOpacity: number = 0
-  @State sheetTranslateY: number = 300
+  @State currentTypeIndex: number = 0                      // 当前选中的健康类型索引
+  @StorageLink('fontSizeLevel') fontSizeLevel: number = 0  // 全局字体等级
+  @StorageLink('isLogin') isLogin: boolean = false          // 全局登录状态
+  @State showAddSheet: boolean = false                      // 是否显示录入弹窗
+  @State addTypeIndex: number = 0                           // 录入弹窗中的类型索引
+  @State addValue: string = ''                              // 录入数值
+  @State addNote: string = ''                               // 录入备注
+  @State addDate: Date = new Date()                         // 录入日期
+  @State filteredRecords: HealthData[] = []                 // 当前类型的健康记录列表
+  @State trendPoints: TrendPoint[] = []                     // 趋势图数据点
+  @State sheetOpacity: number = 0                           // 弹窗透明度动画
+  @State sheetTranslateY: number = 300                      // 弹窗平移动画
   private healthViewModel: HealthViewModel = new HealthViewModel()
-  private listScroller: ListScroller = new ListScroller()
-  private settings: RenderingContextSettings = new RenderingContextSettings(true)
-  private canvasContext: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
+  private listScroller: ListScroller = new ListScroller()   // 列表滚动控制器（用于关闭滑动操作）
+  private settings: RenderingContextSettings = new RenderingContextSettings(true) // Canvas 抗锯齿设置
+  private canvasContext: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings) // Canvas 绘图上下文
 
   private sz(base: number): number {
     return scaledSize(base, this.fontSizeLevel)
@@ -107,6 +118,10 @@ struct HealthRecord {
     }
   }
 
+  /**
+   * 更新当前类型的健康记录和趋势图数据
+   * 在切换类型、添加/删除记录后调用
+   */
   private updateFilteredData(): void {
     const currentType: string = HEALTH_TYPES[this.currentTypeIndex]
     const records: HealthData[] = this.healthViewModel.getHealthRecords(currentType)
@@ -114,6 +129,11 @@ struct HealthRecord {
     this.buildTrendPoints()
   }
 
+  /**
+   * 构建趋势图数据点
+   * 取最近7条记录，按时间升序排列
+   * 血压取收缩压（斜线前的数值），其他类型直接取数值
+   */
   private buildTrendPoints(): void {
     const currentType: string = HEALTH_TYPES[this.currentTypeIndex]
     const records: HealthData[] = this.healthViewModel.getHealthRecords(currentType)
@@ -140,6 +160,7 @@ struct HealthRecord {
     this.trendPoints = points
   }
 
+  /** 提取健康记录的数值（血压取收缩压，其他直接取数值） */
   private extractNumericValue(record: HealthData): number {
     if (record.type === '血压') {
       const parts: string[] = record.value.split('/')
@@ -151,6 +172,7 @@ struct HealthRecord {
     return parseFloat(record.value)
   }
 
+  /** 格式化时间戳为中文日期时间（如 "6月24日 08:30"） */
   private formatRecordTime(timestamp: number): string {
     const date: Date = new Date(timestamp)
     const month: number = date.getMonth() + 1
@@ -162,6 +184,10 @@ struct HealthRecord {
     return `${month}月${day}日 ${hourStr}:${minuteStr}`
   }
 
+  /**
+   * 添加新的健康记录
+   * 流程：构建 HealthData → 添加到 ViewModel → 关闭弹窗 → 刷新列表和趋势图
+   */
   private addNewRecord(): void {
     const currentType: string = HEALTH_TYPES[this.addTypeIndex]
     const unit: string = TYPE_UNITS[currentType] || ''
@@ -353,6 +379,11 @@ struct HealthRecord {
     }
   }
 
+  /**
+   * Canvas 绘制趋势折线图
+   * 包含：网格线 → Y轴刻度 → 折线 → 渐变填充区域 → 数据点圆点 → X轴标签
+   * 数据不足2条时显示提示文字
+   */
   private drawTrendChart(): void {
     const ctx: CanvasRenderingContext2D = this.canvasContext
     if (!ctx) {

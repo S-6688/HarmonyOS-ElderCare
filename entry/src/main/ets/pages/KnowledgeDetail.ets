@@ -1,3 +1,11 @@
+/**
+ * KnowledgeDetail - 文章详情页面
+ * 功能：
+ *   - 从路由参数获取 articleId，加载对应文章内容
+ *   - 收藏/取消收藏文章（星标按钮 + 底部收藏按钮）
+ *   - 收藏状态持久化到 Preferences
+ * 注意：当前文章数据为硬编码示例数据，未使用数据库持久化
+ */
 import { KnowledgeArticle } from '../model/KnowledgeArticle'
 import { AppColors, AppSizes, scaledSize } from '../common/constants/Styles'
 import { Constants } from '../common/constants/Constants'
@@ -12,21 +20,26 @@ const CATEGORY_COLORS: Record<string, string> = {
 @Component
 struct KnowledgeDetail {
   @StorageLink('fontSizeLevel') fontSizeLevel: number = 0
-  @State article: KnowledgeArticle = new KnowledgeArticle()
-  @State articleLoaded: boolean = false
-  @State isFavorite: boolean = false
-  private favoriteIds: number[] = []
+  @State article: KnowledgeArticle = new KnowledgeArticle() // 当前文章
+  @State articleLoaded: boolean = false                     // 文章是否加载完成
+  @State isFavorite: boolean = false                        // 当前文章是否已收藏
+  private favoriteIds: number[] = []                        // 收藏文章ID列表
 
   private sz(base: number): number {
     return scaledSize(base, this.fontSizeLevel)
   }
 
+  /**
+   * 页面初始化
+   * 加载收藏ID列表 → 从路由参数获取 articleId → 加载文章详情
+   */
   aboutToAppear(): void {
     const hostContext = this.getUIContext().getHostContext()
     if (hostContext) {
       PreferencesUtil.getInstance().ensureInit(hostContext)
     }
     this.loadFavoriteIds()
+    // 从路由参数中获取文章ID
     const params: Record<string, Object> = this.getUIContext().getRouter().getParams() as Record<string, Object>
     if (params && params['articleId']) {
       const articleId: number = params['articleId'] as number
