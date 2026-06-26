@@ -1,0 +1,1 @@
+已执行 npm run build 进行交付验证；本次命令已启动 Hvigor daemon，但在文档生成等待窗口内未返回最终结果。项目已配置 hvigorw.cmd 与 package.json，HAP 预期输出路径为 entry/build/default/outputs/default/entry-default-unsigned.hap。
